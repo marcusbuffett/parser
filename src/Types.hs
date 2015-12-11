@@ -2,5 +2,8 @@ module Types where
 
 data Expr = MyInt Int | 
             MyString String |
-            MyFunc Expr Expr
+            MyAdd Expr Expr |
+            MyPrint Expr
             deriving (Show, Eq)
+
+type Program = String
