@@ -4,28 +4,34 @@ import Types
 import Text.ParserCombinators.Parsec
 import Control.Monad
 
-programToAST :: Program -> Either ParseError Expr
-programToAST = parse programParser ""
+programToAST :: Program -> Either ParseError MyExpr
+programToAST = parse parseExpr ""
 
-programParser :: Parser Expr
-programParser = try parseAdd <|> try parseInt <|> try parseString
+parseExpr :: Parser MyExpr
+parseExpr = try parseString <|>
+            try parseInt <|>
+            try parseFunction <|>
+            try parseApp
 
-parseInt :: Parser Expr
+parseFunction :: Parser MyExpr
+parseFunction = string "keith" >> return (MyInt 3)
+
+parseInt :: Parser MyExpr
 parseInt = liftM (MyInt . read) $
-  lexeme (string "INT") *> lexeme (many1 digit) 
+  lexeme (string "garrett") *> lexeme (many1 digit) 
 
-parseString :: Parser Expr
+parseString :: Parser MyExpr
 parseString = liftM MyString $
-  lexeme (string "STRING") *> char '"' 
+  lexeme (string "eugene") *> char '"' 
   *> lexeme (many1 alphaNum) <* 
   char '"'
 
-parseAdd :: Parser Expr
-parseAdd = do
-  x <- try parseInt <|> parseString
-  lexeme (char '+')
-  y <- try parseInt <|> parseString
-  return $ MyAdd x y
+parseApp :: Parser MyExpr
+parseApp  = do
+  symbol <- many (letter)
+  x <- parseExpr
+  y <- parseExpr
+  return $ MyApplication (MySymbol symbol) [x, y]
 
 ws :: Parser String
 ws = many (oneOf " \t")
